@@ -1,0 +1,343 @@
+@import "tailwindcss";
+
+/*
+ * Dirección de arte: «Infinito». Noche cálida, luz de escenario.
+ * Un negro con algo de madera, un blanco hueso de papel viejo y una sola luz
+ * fuerte —la brasa— que viene de la carátula del disco. Cada mundo tiñe sus
+ * detalles con su propio tono (tinta, plata, ámbar) sin romper la paleta.
+ */
+
+@theme {
+  --color-noche: #0b0a09;
+  --color-noche-2: #13110f;
+  --color-noche-3: #1d1a17;
+  --color-hueso: #efe8dc;
+  --color-ceniza: #a39a8c;
+  --color-humo: #6b6358;
+  --color-linea: rgb(239 232 220 / 0.12);
+
+  --color-brasa: #ff5a1f;
+  --color-tinta: #a594ff;
+  --color-plata: #a6dcc8;
+  --color-ambar: #f2b44a;
+
+  --font-display: var(--font-instrument), "Times New Roman", serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-suave: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --breakpoint-xs: 26rem;
+}
+
+:root {
+  color-scheme: dark;
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --barra: 4.5rem;
+  --tono: var(--color-brasa);
+}
+
+html {
+  background: var(--color-noche);
+  color: var(--color-hueso);
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scrollbar-color: var(--color-humo) var(--color-noche);
+}
+
+body {
+  background: var(--color-noche);
+  font-family: var(--font-sans);
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-brasa);
+  color: var(--color-noche);
+}
+
+:focus-visible {
+  outline: 1.5px solid var(--tono);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+img,
+video,
+canvas {
+  display: block;
+}
+
+/* --- Scroll suave (Lenis) --- */
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* --- Grano de película: textura fija sobre todo el sitio --- */
+
+.grano {
+  pointer-events: none;
+  position: fixed;
+  inset: -50%;
+  z-index: 90;
+  width: 200%;
+  height: 200%;
+  opacity: 0.07;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: grano 0.9s steps(6) infinite;
+}
+
+@keyframes grano {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-6%, 4%); }
+  40% { transform: translate(4%, -7%); }
+  60% { transform: translate(-3%, 9%); }
+  80% { transform: translate(8%, -2%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* --- Piezas tipográficas --- */
+
+@utility contenedor {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  max-width: 110rem;
+}
+
+@utility kicker {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 0.86;
+  letter-spacing: -0.025em;
+}
+
+@utility enlace-linea {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 100% 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.6s var(--ease-expo);
+  &:hover {
+    background-size: 100% 1px;
+    background-position: 0% 100%;
+  }
+}
+
+/* Contorno de letra para titulares gigantes. */
+@utility texto-hueco {
+  -webkit-text-stroke: 1px currentColor;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Líneas de SplitText con máscara: el texto sube desde abajo de su renglón. */
+.linea-mascara {
+  overflow: clip;
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+}
+
+/* La entrada sólo se pinta la primera vez y sólo con JavaScript. */
+html:not(.js) .precarga,
+.ya-visto .precarga {
+  display: none;
+}
+
+/* Cursor propio con mouse: se oculta el del sistema salvo en campos de texto. */
+html.cursor-propio,
+html.cursor-propio a,
+html.cursor-propio button,
+html.cursor-propio [data-cursor] {
+  cursor: none;
+}
+
+/* Antes de que GSAP tome el control los elementos animados no parpadean. */
+.js [data-aparecer] {
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js [data-aparecer] {
+    opacity: 1;
+  }
+}
+
+/* --- Texto enriquecido (bitácora, biografía) --- */
+
+.prosa {
+  font-size: clamp(1.0625rem, 0.4vw + 1rem, 1.25rem);
+  line-height: 1.7;
+  color: rgb(239 232 220 / 0.82);
+}
+.prosa > * + * {
+  margin-top: 1.25em;
+}
+.prosa h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1;
+  color: var(--color-hueso);
+  margin-top: 2em;
+}
+.prosa h3 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  line-height: 1.1;
+  color: var(--color-hueso);
+  margin-top: 1.75em;
+}
+.prosa a {
+  color: var(--color-hueso);
+  text-decoration: underline;
+  text-decoration-color: var(--tono);
+  text-underline-offset: 0.2em;
+}
+.prosa blockquote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(1.75rem, 2.6vw, 2.5rem);
+  line-height: 1.15;
+  color: var(--color-hueso);
+  border-left: 1px solid var(--tono);
+  padding-left: 1.25rem;
+}
+.prosa ul {
+  list-style: disc;
+  padding-left: 1.25em;
+}
+.prosa ol {
+  list-style: decimal;
+  padding-left: 1.25em;
+}
+.prosa strong {
+  color: var(--color-hueso);
+  font-weight: 600;
+}
+
+/* --- Transiciones entre páginas (View Transitions de React) --- */
+
+::view-transition-old(.pagina) {
+  animation: 0.45s var(--ease-suave) both salida-pagina;
+}
+::view-transition-new(.pagina) {
+  animation: 0.9s var(--ease-expo) 0.15s both entrada-pagina;
+}
+@keyframes salida-pagina {
+  to {
+    opacity: 0;
+    transform: translateY(-3vh) scale(0.985);
+    filter: blur(6px);
+  }
+}
+@keyframes entrada-pagina {
+  from {
+    clip-path: inset(100% 0 0 0);
+    transform: translateY(8vh);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+    transform: none;
+  }
+}
+
+/* Foto que viaja de la miniatura a la página de detalle. */
+::view-transition-group(.foto-viaje) {
+  animation-duration: 0.75s;
+  animation-timing-function: var(--ease-expo);
+}
+::view-transition-image-pair(.foto-viaje) {
+  animation-name: via-desenfoque;
+}
+@keyframes via-desenfoque {
+  35% {
+    filter: blur(4px) brightness(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+  .grano {
+    animation: none;
+  }
+}
+
+/* --- Animaciones ligeras ligadas al scroll, sin JavaScript (CSS scroll-driven) --- */
+
+@supports (animation-timeline: view()) {
+  .acercar-al-ver {
+    animation: acercar linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 60%;
+  }
+  @keyframes acercar {
+    from {
+      transform: scale(1.18);
+      filter: saturate(0.4) brightness(0.7);
+    }
+    to {
+      transform: scale(1);
+      filter: none;
+    }
+  }
+}
+
+/* Marquesina infinita. */
+@keyframes marquesina {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Barras del ecualizador cuando no hay datos de audio (reproducción remota). */
+@keyframes barra {
+  0%, 100% { transform: scaleY(0.25); }
+  50% { transform: scaleY(1); }
+}
+
+/* Barras de scroll ocultas en carruseles táctiles. */
+.sin-barra {
+  scrollbar-width: none;
+}
+.sin-barra::-webkit-scrollbar {
+  display: none;
+}
+
+/* Indicador de «bajar» del inicio. */
+@keyframes caer {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(200%); }
+}
+
+/* Disco de vinilo: gira mientras suena. */
+@keyframes girar {
+  to { rotate: 360deg; }
+}
