@@ -6,6 +6,7 @@ import { bus } from "./bus";
 /**
  * Ecualizador en vivo: barras que siguen las frecuencias de lo que suena.
  * Dibuja en <canvas> fuera de React; quieto, las barras respiran apenas.
+ * Sólo dibuja mientras está a la vista.
  */
 export default function Ondas({
   barras = 24,
@@ -38,7 +39,16 @@ export default function Ondas({
     const ro = new ResizeObserver(medir);
     ro.observe(c);
 
+    let visible = false;
+    const io = new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      cancelAnimationFrame(id);
+      if (visible) id = requestAnimationFrame(dibujar);
+    });
+    io.observe(c);
+
     const dibujar = () => {
+      if (!visible) return;
       t += 0.04;
       const { width: w, height: h } = c;
       ctx.clearRect(0, 0, w, h);
@@ -64,10 +74,10 @@ export default function Ondas({
       }
       id = requestAnimationFrame(dibujar);
     };
-    id = requestAnimationFrame(dibujar);
     return () => {
       cancelAnimationFrame(id);
       ro.disconnect();
+      io.disconnect();
     };
   }, [barras, color, activo]);
 

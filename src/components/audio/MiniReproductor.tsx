@@ -17,7 +17,7 @@ export default function MiniReproductor() {
   const barra = useRef<HTMLDivElement>(null);
   const tiempo = useRef<HTMLSpanElement>(null);
 
-  // Progreso leído del <audio> en cada cuadro: fluido y sin re-renderizar.
+  // Progreso leído del <audio> en cada cuadro mientras suena: fluido y sin re-renderizar.
   useEffect(() => {
     let id = 0;
     const paso = () => {
@@ -26,11 +26,11 @@ export default function MiniReproductor() {
         barra.current.style.transform = `scaleX(${el.currentTime / el.duration})`;
         if (tiempo.current) tiempo.current.textContent = minutos(el.currentTime);
       }
-      id = requestAnimationFrame(paso);
+      if (sonando) id = requestAnimationFrame(paso);
     };
     id = requestAnimationFrame(paso);
     return () => cancelAnimationFrame(id);
-  }, [audio]);
+  }, [audio, sonando, actual]);
 
   const visible = Boolean(actual);
 
@@ -43,7 +43,7 @@ export default function MiniReproductor() {
         visible ? "translate-y-0 opacity-100" : "translate-y-[140%] opacity-0"
       }`}
     >
-      <div className="relative overflow-hidden rounded-2xl border border-linea bg-noche-2/80 shadow-[0_20px_60px_-20px_rgb(0_0_0/0.9)] backdrop-blur-xl backdrop-saturate-150">
+      <div className="relative overflow-hidden rounded-2xl border border-linea bg-noche-2/95 shadow-[0_20px_60px_-20px_rgb(0_0_0/0.9)]">
         {/* Barra de progreso: tocarla salta a ese punto. */}
         <button
           type="button"
@@ -60,7 +60,7 @@ export default function MiniReproductor() {
 
         <div className="flex items-center gap-3 p-2.5 pr-3">
           {actual?.albumSlug ? (
-            <Link href={`/musica/${actual.albumSlug}`} className="relative size-11 shrink-0 overflow-hidden rounded-lg bg-noche-3">
+            <Link href={`/musica#${actual.albumSlug}`} aria-label={`Ir a «${actual.album}»`} className="relative size-11 shrink-0 overflow-hidden rounded-lg bg-noche-3">
               {actual.portada && <Foto foto={actual.portada} fill sizes="44px" className={`object-cover transition-transform duration-[2s] ${sonando ? "scale-110" : ""}`} />}
             </Link>
           ) : (
