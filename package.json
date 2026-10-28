@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
+    "@sanity/icons": "^5.2.3",
     "@sanity/locale-es-es": "^1.2.39",
     "@sanity/vision": "^6.19.0",
     "gsap": "^3.15.0",

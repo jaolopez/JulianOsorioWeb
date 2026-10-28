@@ -1,16 +1,5 @@
 import { acerca, ajustes, portada } from "./unicos";
-import { album, evento, video } from "./musica";
-import { experiencia, galeria, publicacion, texto } from "./obras";
+import { album, cancion, evento, video } from "./musica";
+import { experiencia, galeria, texto } from "./obras";
 
-export const schemaTypes = [
-  portada,
-  acerca,
-  ajustes,
-  album,
-  video,
-  evento,
-  texto,
-  galeria,
-  experiencia,
-  publicacion,
-];
+export const schemaTypes = [portada, acerca, ajustes, cancion, album, video, evento, texto, galeria, experiencia];
