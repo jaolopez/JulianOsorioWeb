@@ -87,7 +87,7 @@ export default function LuzDetenida({ items }: { items: Item[] }) {
         {items.map((it, i) => (
           <Link
             key={`${it.slug}-${it.foto.src}`}
-            href={`/fotografia/${it.slug}`}
+            href={`/fotografia#${it.slug}`}
             data-cursor="Ver"
             className={`group relative h-[60svh] shrink-0 snap-center overflow-hidden rounded-sm ${alturas[i % alturas.length]}`}
             style={{ aspectRatio: `${it.foto.ancho} / ${it.foto.alto}` }}
@@ -95,7 +95,7 @@ export default function LuzDetenida({ items }: { items: Item[] }) {
             <div data-dentro className="absolute inset-y-0 -inset-x-[10%]">
               <Foto foto={it.foto} fill sizes="(min-width: 768px) 50vw, 85vw" className="object-cover transition-transform duration-1000 ease-[var(--ease-expo)] group-hover:scale-105" />
             </div>
-            <span className="kicker absolute bottom-4 left-4 rounded-full bg-noche/60 px-3 py-2 text-hueso backdrop-blur-md">
+            <span className="kicker absolute bottom-4 left-4 rounded-full bg-noche/80 px-3 py-2 text-hueso">
               {String(i + 1).padStart(2, "0")} — {it.galeria}
             </span>
           </Link>

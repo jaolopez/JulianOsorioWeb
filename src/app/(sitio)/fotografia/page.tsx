@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ViewTransition } from "react";
+import Visor from "@/components/fotografia/Visor";
 import Escena from "@/components/movimiento/Escena";
 import Encabezado from "@/components/ui/Encabezado";
 import Foto from "@/components/ui/Foto";
-import { fechaCorta } from "@/lib/fechas";
+import { fechaLarga } from "@/lib/fechas";
 import { MUNDOS } from "@/lib/mundos";
 import { getGalerias, getPortada } from "@/sanity/queries";
 
@@ -13,6 +12,11 @@ export const metadata: Metadata = {
   description: "Galerías de Julián Osorio. Una imagen que compromete la visual, un momento que se queda en la memoria.",
 };
 
+/**
+ * Todas las galerías en una página: cada una abre con su foto de portada a
+ * lo ancho y sigue con el mosaico, que se amplía al tocar. El índice de
+ * arriba lleva directo a cada una.
+ */
 export default async function FotografiaPagina() {
   const [galerias, portada] = await Promise.all([getGalerias(), getPortada()]);
   const m = MUNDOS.fotografia;
@@ -20,31 +24,52 @@ export default async function FotografiaPagina() {
 
   return (
     <main style={{ "--tono": m.tono } as React.CSSProperties}>
-      <Encabezado rotulo={`${m.numero} · ${m.lema}`} titulo="Fotografía" cursiva="la luz detenida" bajada={frase} tono={m.tono} />
+      <Encabezado rotulo={`${m.numero} · ${m.lema}`} titulo="Fotografía" cursiva="la luz detenida" bajada={frase} tono={m.tono}>
+        {galerias.length > 1 && (
+          <nav aria-label="Galerías" className="md:col-span-12">
+            <ul data-aparecer className="flex flex-wrap gap-2">
+              {galerias.map((g) => (
+                <li key={g.slug}>
+                  <a
+                    href={`#${g.slug}`}
+                    className="kicker flex items-center gap-2 rounded-full border border-linea px-4 py-2.5 text-ceniza transition-colors hover:border-plata hover:text-hueso"
+                  >
+                    {g.titulo}
+                    <span className="text-humo">{g.fotos.length}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
+      </Encabezado>
 
-      <div className="contenedor grid gap-x-8 gap-y-20 pb-28 md:grid-cols-12 md:pb-40">
-        {galerias.map((g, i) => {
-          // Ritmo editorial: una grande, dos medianas desfasadas.
-          const forma = ["md:col-span-8", "md:col-span-4 md:mt-[30vh]", "md:col-span-5 md:col-start-2", "md:col-span-5 md:col-start-8 md:mt-[16vh]"][i % 4];
-          return (
-            <Link key={g.slug} href={`/fotografia/${g.slug}`} data-cursor="Ver" className={`group block ${forma}`}>
-              <div data-revelar className="relative aspect-[4/5] overflow-hidden rounded-sm bg-noche-3 md:aspect-auto md:h-[min(80vh,52rem)]">
-                <ViewTransition name={`galeria-${g.slug}`} share="foto-viaje" default="none">
-                  <Foto foto={g.portada} fill sizes="(min-width: 768px) 60vw, 100vw" className="object-cover transition-transform duration-[1.4s] ease-[var(--ease-expo)] group-hover:scale-105" />
-                </ViewTransition>
-                <span className="kicker absolute left-4 top-4 rounded-full bg-noche/60 px-3 py-2 text-hueso backdrop-blur-md">
-                  {g.fotos.length} fotos
-                </span>
-              </div>
-              <div className="mt-6 flex items-baseline justify-between gap-6">
-                <h2 className="display text-[clamp(2.25rem,4vw,4rem)] transition-colors group-hover:italic group-hover:text-plata">{g.titulo}</h2>
-                <span className="kicker shrink-0 text-humo">{g.lugar ?? fechaCorta(g.fecha)}</span>
-              </div>
-              {g.descripcion && <p className="mt-3 max-w-md text-ceniza">{g.descripcion}</p>}
-            </Link>
-          );
-        })}
-      </div>
+      {galerias.map((g, i) => (
+        <section key={g.slug} id={g.slug} className="scroll-mt-[var(--barra)] pb-24 md:pb-36" aria-labelledby={`galeria-${g.slug}`}>
+          <div className="relative h-[70svh] min-h-[26rem] overflow-hidden">
+            <div data-parallax="0.12" className="absolute -inset-y-[12%] inset-x-0">
+              <Foto foto={g.portada} fill priority={i === 0} sizes="100vw" quality={90} className="object-cover" />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-noche via-noche/20 to-noche/30" />
+            <div className="contenedor absolute inset-x-0 bottom-0 pb-10 md:pb-14">
+              <p className="kicker text-plata">{String(i + 1).padStart(2, "0")} · Galería</p>
+              <h2 id={`galeria-${g.slug}`} data-letras className="display mt-5 text-[clamp(3.25rem,10vw,10rem)]">
+                {g.titulo}
+              </h2>
+              <p className="kicker mt-5 text-ceniza">{[g.lugar, fechaLarga(g.fecha), `${g.fotos.length} fotos`].filter(Boolean).join(" · ")}</p>
+            </div>
+          </div>
+
+          <div className="contenedor pt-12 md:pt-16">
+            {g.descripcion && (
+              <p data-aparecer className="mb-12 max-w-2xl font-display text-[clamp(1.6rem,2.6vw,2.4rem)] leading-tight text-hueso/90 md:mb-16">
+                {g.descripcion}
+              </p>
+            )}
+            <Visor fotos={g.fotos} titulo={g.titulo} />
+          </div>
+        </section>
+      ))}
       <Escena />
     </main>
   );
