@@ -158,9 +158,19 @@ export default function Coreografia() {
     if (window.__escena === window.location.pathname) arrancar();
     else window.addEventListener("escena-lista", arrancar, { once: true });
 
+    // Una letra que se despliega alarga la página: lo que sigue se recalcula al terminar.
+    let alDesplegar = 0;
+    const desplegado = () => {
+      clearTimeout(alDesplegar);
+      alDesplegar = window.setTimeout(() => ScrollTrigger.refresh(), 650);
+    };
+    raiz.addEventListener("toggle", desplegado, true);
+
     return () => {
       vivo = false;
       window.removeEventListener("escena-lista", arrancar);
+      raiz.removeEventListener("toggle", desplegado, true);
+      clearTimeout(alDesplegar);
       clearTimeout(pendiente);
       mo.disconnect();
       ctx.revert();

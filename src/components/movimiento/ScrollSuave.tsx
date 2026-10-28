@@ -22,9 +22,10 @@ export default function ScrollSuave() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    // Seguimiento por interpolación (no por duración fija): responde en el
+    // mismo cuadro en que se mueve la rueda y frena enseguida al soltarla.
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      lerp: 0.12,
       smoothWheel: true,
       anchors: { offset: -80 },
     });
