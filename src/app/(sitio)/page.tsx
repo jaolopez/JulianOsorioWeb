@@ -1,40 +1,50 @@
-import Bitacora from "@/components/inicio/Bitacora";
 import Hablemos from "@/components/inicio/Hablemos";
 import Hero from "@/components/inicio/Hero";
 import LuzDetenida from "@/components/inicio/LuzDetenida";
 import Manifiesto from "@/components/inicio/Manifiesto";
 import Mesa from "@/components/inicio/Mesa";
-import Mundos from "@/components/inicio/Mundos";
 import MusicaDestacada from "@/components/inicio/MusicaDestacada";
 import PoemaDestacado from "@/components/inicio/PoemaDestacado";
+import Quien from "@/components/inicio/Quien";
 import Escena from "@/components/movimiento/Escena";
 import Agenda from "@/components/musica/Agenda";
 import { FOTOS } from "@/lib/contenido";
 import { pistasDe } from "@/lib/pistas";
 import {
+  getAcerca,
   getAjustes,
   getAlbumes,
   getExperiencias,
   getGalerias,
   getPortada,
   getProximosEventos,
-  getPublicaciones,
+  getSencillos,
   getTextos,
 } from "@/sanity/queries";
 
+/**
+ * El inicio es la casa de Julián: su nombre y las cuatro puertas arriba, y
+ * al bajar, quién es y un adelanto de cada mundo.
+ */
 export default async function Inicio() {
-  const [portada, ajustes, albumes, textos, galerias, experiencias, publicaciones, eventos] = await Promise.all([
+  const [portada, ajustes, acerca, albumes, sencillos, textos, galerias, experiencias, eventos] = await Promise.all([
     getPortada(),
     getAjustes(),
+    getAcerca(),
     getAlbumes(),
+    getSencillos(),
     getTextos(),
     getGalerias(),
     getExperiencias(),
-    getPublicaciones(),
     getProximosEventos(),
   ]);
 
-  const album = albumes.find((a) => a.slug === portada.albumSlug) ?? albumes[0];
+  // Lo que suena desde el inicio: lo elegido en el Studio, o el disco más reciente.
+  const elegido = portada.destacado;
+  const album =
+    (elegido && (elegido.tipo === "cancion" ? sencillos : albumes).find((a) => a.slug === elegido.slug)) ??
+    albumes[0] ??
+    sencillos[0];
   const texto = textos.find((t) => t.slug === portada.textoSlug) ?? textos[0];
   const mesa = experiencias[0];
   const fraseMesa = portada.mundos.find((m) => m.clave === "gastronomia")?.frase ?? mesa?.descripcion ?? "";
@@ -54,17 +64,17 @@ export default async function Inicio() {
         titular={portada.titular}
         bajada={portada.bajada}
         ciudad={ajustes.ciudad}
+        mundos={portada.mundos}
         pistas={album ? pistasDe(album) : []}
         disco={album?.titulo}
       />
-      <Manifiesto texto={portada.manifiesto} foto={fotoMusica ?? FOTOS.escenario} />
-      <Mundos mundos={portada.mundos} />
-      {album && <MusicaDestacada album={album} funda={fotoMusica} />}
+      <Manifiesto texto={portada.manifiesto} foto={FOTOS.concierto} />
+      <Quien acerca={acerca} ajustes={ajustes} />
+      {album && <MusicaDestacada album={album} funda={album.tipo === "sencillo" ? undefined : fotoMusica} />}
       <Agenda eventos={eventos.slice(0, 4)} titulo="Próximas fechas" />
       {texto && <PoemaDestacado texto={texto} />}
       {tira.length > 0 && <LuzDetenida items={tira} />}
       {mesa && <Mesa experiencia={mesa} frase={fraseMesa} />}
-      <Bitacora publicaciones={publicaciones} />
       <Hablemos ajustes={ajustes} />
       <Escena />
     </main>

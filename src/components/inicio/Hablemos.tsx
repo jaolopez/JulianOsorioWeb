@@ -8,7 +8,7 @@ import type { Ajustes } from "@/lib/tipos";
 export default function Hablemos({ ajustes }: { ajustes: Ajustes }) {
   const { correo, whatsapp } = ajustes;
   return (
-    <section className="relative overflow-hidden py-24 md:py-36" aria-label="Contacto">
+    <section id="contacto" className="relative scroll-mt-[var(--barra)] overflow-hidden py-24 md:py-36" aria-label="Contacto">
       <Marquesina velocidad={28} className="text-hueso">
         <span className="display px-[0.2em] text-[clamp(5rem,16vw,16rem)] italic">Hablemos</span>
         <span className="display px-[0.2em] text-[clamp(5rem,16vw,16rem)] text-brasa">✺</span>
@@ -29,7 +29,7 @@ export default function Hablemos({ ajustes }: { ajustes: Ajustes }) {
         )}
         {!correo && !whatsapp && (
           <Magnetico>
-            <Link href="/acerca" className="flex items-center gap-3 rounded-full bg-hueso px-7 py-4 text-noche transition-colors hover:bg-brasa">
+            <Link href="/#acerca" className="flex items-center gap-3 rounded-full bg-hueso px-7 py-4 text-noche transition-colors hover:bg-brasa">
               Conocer a Julián
             </Link>
           </Magnetico>
