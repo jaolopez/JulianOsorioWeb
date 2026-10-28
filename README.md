@@ -2,7 +2,9 @@
 
 Sitio de [julianosoriomusic.com](https://www.julianosoriomusic.com): música, escritura, fotografía y gastronomía, con un módulo de edición (Sanity Studio) en `/studio` para publicar sin tocar código.
 
-Reemplaza al sitio anterior en WordPress. Las direcciones viejas (`/musica-portfolio`, `/poema-portfolio`, `/galerias`, `/gastronomia-albums`, `/acerca-de-mi`) redirigen a las nuevas.
+Reemplaza al sitio anterior en WordPress y conserva su forma: **el inicio y cuatro páginas** —Música, Escritura, Fotografía y Gastronomía—. El inicio es la casa de Julián: su nombre, las cuatro puertas a sus mundos desde la primera pantalla, quién es y un adelanto de cada mundo. Cada disco, texto o galería vive dentro de su página y se enlaza con `#` (por ejemplo `/escritura#lo-que-queda` abre ese texto).
+
+Las direcciones viejas (`/musica-portfolio`, `/poema-portfolio`, `/galerias`, `/gastronomia-albums`, `/acerca-de-mi`) redirigen a las nuevas.
 
 ## Tecnologías
 
@@ -53,7 +55,7 @@ El plan gratuito alcanza de sobra para este sitio y el cliente no paga nada: el 
    npx sanity cors add https://www.julianosoriomusic.com --credentials
    ```
 
-4. **Cargar el contenido inicial** (disco, canciones, fotos, galerías, portada, bitácora):
+4. **Cargar el contenido inicial** (disco, canciones, fotos, galerías, portada, acerca de mí):
 
    ```bash
    npm run cargar-contenido
@@ -69,26 +71,36 @@ El plan gratuito alcanza de sobra para este sitio y el cliente no paga nada: el 
 
 6. **Invitar a Julián**: sanity.io/manage → Members → Invite (rol *Editor*). Entra a `/studio` con su correo de Google o con usuario y contraseña.
 
-## Qué se edita desde `/studio`
+## Cómo publicar desde `/studio`
 
-- **Portada**: titular, bajada, manifiesto, álbum y texto destacados, foto y frase de cada mundo.
-- **Bitácora**: publicaciones con texto, fotos y videos de YouTube.
-- **Música**: álbumes y sencillos (carátula, canciones con su MP3 y letra, enlaces a plataformas), videos y agenda de fechas.
-- **Escritura**: poemas, prosa y relatos. Se pegan tal cual; los renglones se respetan.
-- **Fotografía**: galerías (se arrastran varias fotos a la vez).
-- **Gastronomía**: experiencias #experienciasoneto con fotos y menú.
-- **Acerca de mí** y **Contacto y redes** (correo, WhatsApp, Instagram, Spotify, YouTube…).
+El panel tiene el mismo orden que el sitio. Nada pide «dirección web» ni campos técnicos: se escribe el título y se publica.
+
+| Para… | Ir a | Hacer |
+| --- | --- | --- |
+| Subir una canción | Música → **Canciones** → ✎ | Arrastrar el MP3 → **Publicar**. El título sale del nombre del archivo (se puede cambiar); carátula y letra son opcionales. |
+| Subir un disco | Música → **Discos** → ✎ | Nombre del disco → arrastrar **todos los MP3 a la vez** sobre «Canciones» → carátula → **Publicar**. Se ordenan arrastrándolas. |
+| Agregar un video | Música → **Videos** → ✎ | Pegar el enlace de YouTube → **Publicar**. El título se toma de YouTube si se deja vacío. |
+| Anunciar un concierto | Música → **Fechas de conciertos** | Nombre, fecha y lugar. Las fechas pasadas desaparecen solas. |
+| Publicar un poema o texto | **Textos y poemas** | Pegar el texto tal cual (los renglones se respetan). |
+| Subir fotos | **Galerías de fotos** | Arrastrar varias fotos a la vez. |
+| Gastronomía | **Experiencias gastronómicas** | Fotos, descripción y menú. |
+| Cambiar el inicio | **Portada** / **Acerca de mí** | Frases, foto de cada puerta, música y texto destacados, biografía. |
+| Correo y redes | **Contacto y redes** | Las que queden vacías no se muestran. |
+
+Los videos van a YouTube y no al Studio a propósito: un video pesa cientos de MB y el plan gratuito de Sanity tiene cupo de archivos y de tráfico; YouTube los sirve gratis y mejor. Los MP3 (unos pocos MB cada uno) sí se suben al Studio.
+
+La duración de cada canción no hay que escribirla: el sitio la lee del archivo.
 
 ## Estructura
 
 ```
 src/
-  app/(sitio)/        páginas públicas (inicio, música, escritura, fotografía, gastronomía, bitácora, acerca)
+  app/(sitio)/        páginas públicas (inicio, música, escritura, fotografía, gastronomía)
   app/studio/         Sanity Studio
   app/api/revalidate  webhook de Sanity
   components/
     audio/            reproductor persistente, analizador y ecualizador
-    inicio/           secciones de la portada (Hero con shader, manifiesto, mundos…)
+    inicio/           secciones del inicio (nombre y cuatro puertas sobre el shader, acerca de mí…)
     movimiento/       scroll suave, coreografía de animaciones, cursor, precarga
   lib/                tipos, contenido de respaldo, utilidades
   sanity/             esquemas del Studio, consultas y cliente
@@ -107,9 +119,18 @@ Las páginas son componentes de servidor; para animar algo basta marcarlo:
 | `data-parallax="0.15"` | se desplaza más lento que el scroll |
 | `data-palabras` | cada palabra se enciende al bajar |
 | `data-revelar` | la imagen se descubre como un telón |
-| `data-cursor="Ver"` | el cursor crece y muestra la palabra |
+| `data-cursor="Ver"` | una burbuja con la palabra acompaña al puntero |
 
 Todo respeta `prefers-reduced-motion`.
+
+### Fluidez
+
+Las animaciones mueven sólo `transform`, `opacity` y `clip-path`, que la tarjeta de video resuelve sin volver a dibujar la página. Además:
+
+- Sin `backdrop-filter` ni `filter: blur()` grandes: sobre el humo animado obligarían a recalcular el desenfoque en cada cuadro. Los halos son degradados.
+- El shader del humo se dibuja a media resolución y a 60 cuadros como máximo, y se detiene fuera de pantalla.
+- El puntero del sistema nunca se esconde (es el único que no llega tarde); la burbuja que lo acompaña duerme cuando no hay nada que mostrar.
+- Los bucles de animación (ecualizador, progreso del reproductor) sólo corren mientras se ven o mientras suena algo.
 
 ## Despliegue
 
