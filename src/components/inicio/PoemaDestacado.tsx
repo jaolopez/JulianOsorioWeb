@@ -34,7 +34,7 @@ export default function PoemaDestacado({ texto }: { texto: Texto }) {
           </h2>
           <Poema cuerpo={corto} prosa={texto.tipo !== "poema"} className="mt-12" />
           <div data-aparecer className="mt-14 flex flex-wrap gap-x-10 gap-y-4">
-            <Link href={`/escritura/${texto.slug}`} className="group inline-flex items-center gap-3">
+            <Link href={`/escritura#${texto.slug}`} className="group inline-flex items-center gap-3">
               <span className="enlace-linea">Leer completo</span>
               <Flecha className="size-4 transition-transform group-hover:translate-x-1" />
             </Link>
