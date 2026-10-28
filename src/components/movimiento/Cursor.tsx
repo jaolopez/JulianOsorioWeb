@@ -2,83 +2,109 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { gsap, punteroFino, sinMovimiento } from "@/lib/gsap";
+import { punteroFino, sinMovimiento } from "@/lib/gsap";
 
 /**
- * Cursor propio: un punto que sigue al mouse con exactitud y un aro que llega
- * con un poco de retraso. Sobre un enlace marcado con `data-cursor="Ver"` el
- * aro crece y muestra la palabra. Sólo con mouse; en pantallas táctiles no
- * existe.
+ * Burbuja que acompaña al puntero sobre lo que se puede abrir o tocar
+ * (`data-cursor="Ver"`, «Play», «Leer»…), con la luz del mundo que se señala.
+ *
+ * El puntero del sistema no se esconde: es el único que nunca llega tarde.
+ * La burbuja se mueve sólo con `transform` en su propia capa, en un bucle
+ * que duerme cuando no hay nada que mostrar. Sólo con mouse.
  */
 export default function Cursor() {
-  const punto = useRef<HTMLDivElement>(null);
-  const aro = useRef<HTMLDivElement>(null);
+  const burbuja = useRef<HTMLDivElement>(null);
   const etiqueta = useRef<HTMLSpanElement>(null);
   const ruta = usePathname();
+  const apagar = useRef<() => void>(() => {});
 
   useEffect(() => {
     if (!punteroFino() || sinMovimiento()) return;
-    const p = punto.current!;
-    const a = aro.current!;
-    document.documentElement.classList.add("cursor-propio");
+    const b = burbuja.current!;
+    const pos = { x: -200, y: -200, tx: -200, ty: -200, s: 0, ts: 0 };
+    let id = 0;
+    let previo = 0;
 
-    gsap.set([p, a], { xPercent: -50, yPercent: -50, opacity: 0 });
-    const px = gsap.quickTo(p, "x", { duration: 0.08, ease: "power3" });
-    const py = gsap.quickTo(p, "y", { duration: 0.08, ease: "power3" });
-    const ax = gsap.quickTo(a, "x", { duration: 0.55, ease: "power3" });
-    const ay = gsap.quickTo(a, "y", { duration: 0.55, ease: "power3" });
+    const pintar = () => {
+      b.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0) translate(-50%, -50%) scale(${pos.s})`;
+    };
+
+    const cuadro = (ahora: number) => {
+      // Suavizado independiente de los cuadros por segundo (60 o 120 Hz se sienten igual).
+      const dt = Math.min(64, ahora - (previo || ahora - 16.7));
+      previo = ahora;
+      const k = 1 - Math.pow(1 - 0.28, dt / 16.7);
+      const ks = 1 - Math.pow(1 - 0.2, dt / 16.7);
+      pos.x += (pos.tx - pos.x) * k;
+      pos.y += (pos.ty - pos.y) * k;
+      pos.s += (pos.ts - pos.s) * ks;
+      pintar();
+      const quieto = Math.abs(pos.tx - pos.x) < 0.1 && Math.abs(pos.ty - pos.y) < 0.1 && Math.abs(pos.ts - pos.s) < 0.002;
+      if (quieto) {
+        pos.s = pos.ts;
+        pintar();
+        id = 0;
+        previo = 0;
+        return;
+      }
+      id = requestAnimationFrame(cuadro);
+    };
+    const despertar = () => {
+      if (!id) id = requestAnimationFrame(cuadro);
+    };
 
     const mover = (e: PointerEvent) => {
-      px(e.clientX);
-      py(e.clientY);
-      ax(e.clientX);
-      ay(e.clientY);
-      gsap.to([p, a], { opacity: 1, duration: 0.3, overwrite: "auto" });
+      pos.tx = e.clientX;
+      pos.ty = e.clientY;
+      // Si la burbuja estaba apagada, aparece donde está el puntero, no viaja desde lejos.
+      if (pos.s < 0.02) {
+        pos.x = pos.tx;
+        pos.y = pos.ty;
+      }
+      if (pos.ts > 0 || pos.s > 0) despertar();
     };
-    const salir = () => gsap.to([p, a], { opacity: 0, duration: 0.3 });
 
     const sobre = (e: PointerEvent) => {
-      const el = (e.target as HTMLElement).closest<HTMLElement>("a, button, [data-cursor]");
+      const el = (e.target as HTMLElement).closest<HTMLElement>("[data-cursor]");
       const texto = el?.dataset.cursor ?? "";
-      if (etiqueta.current) etiqueta.current.textContent = texto;
-      // Toma la luz del mundo que se está señalando (tinta, plata, ámbar…).
-      const tono = (el && getComputedStyle(el).getPropertyValue("--tono").trim()) || "#ff5a1f";
-      gsap.to(a, {
-        width: texto ? 96 : el ? 56 : 36,
-        height: texto ? 96 : el ? 56 : 36,
-        backgroundColor: texto ? tono : "rgba(255,90,31,0)",
-        borderColor: texto ? "rgba(255,90,31,0)" : el ? "rgba(239,232,220,0.9)" : "rgba(239,232,220,0.4)",
-        duration: 0.5,
-        ease: "casa",
-      });
-      gsap.to(p, { scale: el ? 0 : 1, duration: 0.3 });
-      gsap.to(etiqueta.current, { opacity: texto ? 1 : 0, scale: texto ? 1 : 0.6, duration: 0.4 });
+      if (texto) {
+        etiqueta.current!.textContent = texto;
+        b.style.backgroundColor = getComputedStyle(el!).getPropertyValue("--tono").trim() || "#ff5a1f";
+      }
+      pos.ts = texto ? 1 : 0;
+      despertar();
     };
+
+    const fuera = () => {
+      pos.ts = 0;
+      despertar();
+    };
+    apagar.current = fuera;
 
     window.addEventListener("pointermove", mover, { passive: true });
     window.addEventListener("pointerover", sobre, { passive: true });
-    document.addEventListener("pointerleave", salir);
+    document.documentElement.addEventListener("pointerleave", fuera);
+    window.addEventListener("blur", fuera);
     return () => {
+      cancelAnimationFrame(id);
       window.removeEventListener("pointermove", mover);
       window.removeEventListener("pointerover", sobre);
-      document.removeEventListener("pointerleave", salir);
-      document.documentElement.classList.remove("cursor-propio");
+      document.documentElement.removeEventListener("pointerleave", fuera);
+      window.removeEventListener("blur", fuera);
     };
   }, []);
 
-  // Al navegar, el enlace que se clickeó desaparece: el aro vuelve a su tamaño.
-  useEffect(() => {
-    if (!aro.current) return;
-    gsap.to(aro.current, { width: 36, height: 36, backgroundColor: "rgba(255,90,31,0)", duration: 0.4 });
-    gsap.to(etiqueta.current, { opacity: 0, duration: 0.2 });
-  }, [ruta]);
+  // Al navegar, el enlace que se clickeó desaparece: la burbuja se va con él.
+  useEffect(() => apagar.current(), [ruta]);
 
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-[100] hidden [@media(pointer:fine)]:block">
-      <div ref={aro} className="fixed left-0 top-0 grid size-9 place-items-center rounded-full border border-hueso/40 mix-blend-difference">
-        <span ref={etiqueta} className="kicker text-[10px] text-noche opacity-0" />
-      </div>
-      <div ref={punto} className="fixed left-0 top-0 size-1.5 rounded-full bg-hueso mix-blend-difference" />
+    <div
+      ref={burbuja}
+      aria-hidden
+      className="pointer-events-none fixed left-0 top-0 z-[100] hidden size-[5.5rem] place-items-center rounded-full bg-brasa will-change-transform [@media(pointer:fine)]:grid"
+      style={{ transform: "translate3d(-200px, -200px, 0) scale(0)" }}
+    >
+      <span ref={etiqueta} className="kicker text-[10px] text-noche" />
     </div>
   );
 }
