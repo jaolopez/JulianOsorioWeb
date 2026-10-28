@@ -8,7 +8,6 @@ import type {
   Foto,
   Galeria,
   Portada,
-  Publicacion,
   Texto,
   Video,
 } from "./tipos";
@@ -79,7 +78,7 @@ export const PORTADA: Portada = {
   bajada: "Música, palabra, luz y mesa. Cuatro maneras de contar lo mismo.",
   manifiesto:
     "Las guitarras, las letras, las melodías. La palabra que se escribe en prosa y en verso. Una imagen que compromete la visual. Una mesa con amigos, algunos tragos y buena música. Todo nace del mismo lugar.",
-  albumSlug: "infinito-mas-cercano",
+  destacado: { tipo: "album", slug: "infinito-mas-cercano" },
   textoSlug: "lo-que-queda",
   mundos: [
     {
@@ -125,6 +124,9 @@ export const ALBUMES: Album[] = [
     enlaces: {},
   },
 ];
+
+/** Canciones sueltas: las sube Julián desde el Studio. */
+export const SENCILLOS: Album[] = [];
 
 export const VIDEOS: Video[] = [];
 
@@ -228,35 +230,8 @@ export const EXPERIENCIAS: Experiencia[] = [
   },
 ];
 
-export const PUBLICACIONES: Publicacion[] = [
-  {
-    slug: "nueva-casa",
-    titulo: "Una nueva casa para el universo creativo",
-    fecha: "2026-10-17",
-    mundo: "general",
-    extracto: "Música, escritura, fotografía y gastronomía, ahora en un solo lugar y con todo por estrenar.",
-    portada: FOTOS.concierto,
-    contenido: parrafos(
-      "Este sitio se renueva por completo. Aquí van a vivir las canciones, los textos, las fotografías y las experiencias alrededor de la mesa.",
-      "Lo primero que encuentran es «Infinito más cercano», para escuchar completo desde cualquier página: el reproductor sigue sonando mientras recorren el resto."
-    ),
-  },
-  {
-    slug: "infinito-mas-cercano",
-    titulo: "«Infinito más cercano», para escuchar aquí",
-    fecha: "2026-10-16",
-    mundo: "musica",
-    extracto: "Tres canciones de rock escritas y compuestas por Julián Osorio.",
-    portada: FOTOS.escenario,
-    contenido: parrafos(
-      "«Infinito más cerca», «¿Por qué no más en ti?» y «Separación seis». Las tres canciones del disco ya están disponibles en la sección de música.",
-      "Denle play y sigan navegando: la música los acompaña."
-    ),
-  },
-];
-
 export const ACERCA: Acerca = {
-  retrato: FOTOS.escenario,
+  retrato: FOTOS.infinito,
   intro: "Guitarras, palabras, luz y mesa compartida.",
   bio: parrafos(
     "Julián Osorio es músico y compositor. Su trabajo se mueve entre cuatro mundos —la música, la escritura, la fotografía y la cocina— que para él son uno solo: la forma de contar lo que estremece.",
