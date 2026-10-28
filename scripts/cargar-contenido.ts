@@ -1,7 +1,7 @@
 /**
  * Carga el contenido inicial al Studio: el disco «Infinito más cercano» con
  * sus tres canciones, las fotos, las galerías, la experiencia gastronómica,
- * la portada, «Acerca de mí» y las dos primeras publicaciones de la bitácora.
+ * la portada y «Acerca de mí».
  *
  * Los textos de muestra de Escritura NO se suben: los publica Julián.
  *
@@ -46,8 +46,6 @@ async function imagen(f?: Foto, conClave = false) {
   };
 }
 
-const slug = (s: string) => ({ _type: "slug", current: s });
-
 async function main() {
   console.log("Cargando contenido en", client.config().projectId, "/", client.config().dataset);
   const tx = client.transaction();
@@ -57,20 +55,20 @@ async function main() {
       _id: `album-${a.slug}`,
       _type: "album",
       titulo: a.titulo,
-      slug: slug(a.slug),
       tipo: a.tipo,
       anio: a.anio,
       genero: a.genero,
       descripcion: a.descripcion,
       portada: await imagen(a.portada),
       canciones: await Promise.all(
-        a.canciones.map(async (s) => ({
-          _type: "cancion",
-          _key: clave(),
-          titulo: s.titulo,
-          duracion: s.duracion,
-          ...(s.audio ? { audio: { _type: "file", asset: { _type: "reference", _ref: await subir(s.audio, "file") } } } : {}),
-        }))
+        a.canciones
+          .filter((s) => s.audio)
+          .map(async (s) => ({
+            _type: "pista",
+            _key: clave(),
+            titulo: s.titulo,
+            asset: { _type: "reference", _ref: await subir(s.audio!, "file") },
+          }))
       ),
       enlaces: a.enlaces,
     });
@@ -81,7 +79,6 @@ async function main() {
       _id: `galeria-${g.slug}`,
       _type: "galeria",
       titulo: g.titulo,
-      slug: slug(g.slug),
       fecha: g.fecha,
       lugar: g.lugar,
       descripcion: g.descripcion,
@@ -95,7 +92,6 @@ async function main() {
       _id: `experiencia-${e.slug}`,
       _type: "experiencia",
       titulo: e.titulo,
-      slug: slug(e.slug),
       fecha: e.fecha,
       lugar: e.lugar,
       descripcion: e.descripcion,
@@ -105,27 +101,13 @@ async function main() {
     });
   }
 
-  for (const p of c.PUBLICACIONES) {
-    tx.createOrReplace({
-      _id: `publicacion-${p.slug}`,
-      _type: "publicacion",
-      titulo: p.titulo,
-      slug: slug(p.slug),
-      fecha: p.fecha,
-      mundo: p.mundo,
-      extracto: p.extracto,
-      portada: await imagen(p.portada),
-      contenido: p.contenido,
-    });
-  }
-
   tx.createOrReplace({
     _id: "portada",
     _type: "portada",
     titular: c.PORTADA.titular,
     bajada: c.PORTADA.bajada,
     manifiesto: c.PORTADA.manifiesto,
-    albumDestacado: { _type: "reference", _ref: `album-${c.PORTADA.albumSlug}` },
+    albumDestacado: { _type: "reference", _ref: `album-${c.PORTADA.destacado?.slug}` },
     mundos: await Promise.all(
       c.PORTADA.mundos.map(async (m) => ({ _type: "mundo", _key: m.clave, clave: m.clave, frase: m.frase, foto: await imagen(m.foto) }))
     ),
