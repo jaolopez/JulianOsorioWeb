@@ -18,7 +18,7 @@ export default function Pie({ ajustes, anio }: { ajustes: Ajustes; anio: number 
               <FlechaDiagonal className="size-7" />
             </a>
           ) : (
-            <Link href="/acerca" className="display mt-5 inline-flex items-center gap-3 text-[clamp(2rem,4vw,3.5rem)] italic hover:text-brasa">
+            <Link href="/#contacto" className="display mt-5 inline-flex items-center gap-3 text-[clamp(2rem,4vw,3.5rem)] italic hover:text-brasa">
               Hablemos
               <FlechaDiagonal className="size-7" />
             </Link>
@@ -33,6 +33,10 @@ export default function Pie({ ajustes, anio }: { ajustes: Ajustes; anio: number 
               <span className="enlace-linea">{n.nombre}</span>
             </Link>
           ))}
+          <Link href="/#acerca" className="group flex items-baseline gap-2 py-1 text-ceniza transition-colors hover:text-hueso">
+            <span className="kicker text-[0.5625rem] text-humo">—</span>
+            <span className="enlace-linea">Sobre Julián</span>
+          </Link>
         </nav>
 
         <div className="flex items-start md:col-span-2 md:justify-end">

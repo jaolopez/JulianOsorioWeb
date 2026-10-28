@@ -9,13 +9,6 @@ import { NAVEGACION } from "@/lib/mundos";
 import type { Ajustes } from "@/lib/tipos";
 import Redes from "./Redes";
 
-const TONOS: Record<string, string> = {
-  "/musica": "var(--color-brasa)",
-  "/escritura": "var(--color-tinta)",
-  "/fotografia": "var(--color-plata)",
-  "/gastronomia": "var(--color-ambar)",
-};
-
 export default function Navegacion({ ajustes }: { ajustes: Ajustes }) {
   const ruta = usePathname();
   const [abierto, setAbierto] = useState(false);
@@ -87,24 +80,26 @@ export default function Navegacion({ ajustes }: { ajustes: Ajustes }) {
 
   return (
     <>
+      {/* Sin desenfoque de fondo a propósito: sobre el humo animado del inicio
+          obligaría a recalcular el desenfoque en cada cuadro. */}
       <header
-        className={`fixed inset-x-0 top-0 z-[70] transition-[translate,background-color,backdrop-filter] duration-700 ease-[var(--ease-expo)] ${
+        className={`fixed inset-x-0 top-0 z-[70] transition-[translate,background-color] duration-700 ease-[var(--ease-expo)] ${
           oculta && !abierto ? "-translate-y-full" : "translate-y-0"
-        } ${solida && !abierto ? "bg-noche/60 backdrop-blur-xl" : ""}`}
+        } ${solida && !abierto ? "bg-noche/90" : "bg-transparent"}`}
       >
         <nav aria-label="Principal" className="contenedor flex h-[var(--barra)] items-center justify-between gap-6">
           <Link href="/" aria-label="Julián Osorio — inicio" className="relative z-10 text-hueso transition-opacity hover:opacity-70">
             <Logo className="h-[1.375rem] w-auto md:h-6" />
           </Link>
 
-          <ul className="hidden items-center gap-7 lg:flex">
+          <ul className="hidden items-center gap-9 lg:flex">
             {NAVEGACION.map((n) => (
               <li key={n.href}>
                 <Link
                   href={n.href}
-                  className={`group flex items-baseline gap-1.5 text-[0.8125rem] transition-colors ${activo(n.href) ? "text-hueso" : "text-ceniza hover:text-hueso"}`}
+                  className={`group flex items-baseline gap-1.5 text-[0.875rem] transition-colors ${activo(n.href) ? "text-hueso" : "text-ceniza hover:text-hueso"}`}
                 >
-                  <span className="kicker text-[0.5625rem] transition-colors" style={{ color: activo(n.href) ? TONOS[n.href] ?? "var(--color-brasa)" : undefined }}>
+                  <span className="kicker text-[0.5625rem] transition-colors" style={{ color: activo(n.href) ? n.tono : undefined }}>
                     {n.numero}
                   </span>
                   <span className="enlace-linea pb-0.5">{n.nombre}</span>
@@ -112,6 +107,13 @@ export default function Navegacion({ ajustes }: { ajustes: Ajustes }) {
               </li>
             ))}
           </ul>
+
+          <Link
+            href="/#contacto"
+            className="kicker hidden rounded-full border border-linea px-4 py-2.5 text-hueso transition-colors hover:border-brasa hover:bg-brasa hover:text-noche lg:block"
+          >
+            Hablemos
+          </Link>
 
           <button
             ref={boton}
@@ -139,7 +141,7 @@ export default function Navegacion({ ajustes }: { ajustes: Ajustes }) {
         inert={!abierto}
         className="invisible fixed inset-0 z-[65] flex flex-col bg-noche-2 pt-[calc(var(--barra)+2rem)] lg:hidden"
       >
-        <div className="pointer-events-none absolute -right-1/3 -top-1/4 size-[120vw] rounded-full bg-brasa/15 blur-[100px]" aria-hidden />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_5%,rgb(255_90_31/0.16),transparent_55%)]" aria-hidden />
         <ul className="contenedor relative flex flex-1 flex-col justify-center gap-1">
           {NAVEGACION.map((n) => (
             <li key={n.href} className="overflow-hidden">
@@ -147,7 +149,7 @@ export default function Navegacion({ ajustes }: { ajustes: Ajustes }) {
                 href={n.href}
                 data-menu-enlace
                 className="flex items-baseline gap-4 py-1"
-                style={{ color: activo(n.href) ? TONOS[n.href] ?? "var(--color-brasa)" : undefined }}
+                style={{ color: activo(n.href) ? n.tono : undefined }}
               >
                 <span className="kicker w-6 text-ceniza">{n.numero}</span>
                 <span className="display text-[clamp(3rem,15vw,6rem)] italic">{n.nombre}</span>
@@ -156,6 +158,14 @@ export default function Navegacion({ ajustes }: { ajustes: Ajustes }) {
           ))}
         </ul>
         <div className="contenedor relative flex flex-col gap-5 border-t border-linea py-6 pb-[calc(env(safe-area-inset-bottom)+6rem)]">
+          <div data-menu-pie className="flex gap-6">
+            <Link href="/#acerca" onClick={() => setAbierto(false)} className="enlace-linea text-lg text-hueso">
+              Sobre Julián
+            </Link>
+            <Link href="/#contacto" onClick={() => setAbierto(false)} className="enlace-linea text-lg text-hueso">
+              Hablemos
+            </Link>
+          </div>
           {ajustes.correo && (
             <a data-menu-pie href={`mailto:${ajustes.correo}`} className="text-lg text-hueso">
               {ajustes.correo}

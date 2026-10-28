@@ -41,9 +41,10 @@ export const MUNDOS: Record<
 
 export const ORDEN_MUNDOS: ClaveMundo[] = ["musica", "escritura", "fotografia", "gastronomia"];
 
-/** Menú principal, en el orden en que aparece en la barra y en el Studio. */
-export const NAVEGACION = [
-  ...ORDEN_MUNDOS.map((c) => ({ href: MUNDOS[c].href, nombre: MUNDOS[c].nombre, numero: MUNDOS[c].numero })),
-  { href: "/bitacora" as const, nombre: "Bitácora", numero: "05" },
-  { href: "/acerca" as const, nombre: "Acerca", numero: "06" },
-];
+/** Menú principal: las cuatro páginas, en el orden en que aparecen en la barra y en el Studio. */
+export const NAVEGACION = ORDEN_MUNDOS.map((c) => ({
+  href: MUNDOS[c].href,
+  nombre: MUNDOS[c].nombre,
+  numero: MUNDOS[c].numero,
+  tono: MUNDOS[c].tono,
+}));
