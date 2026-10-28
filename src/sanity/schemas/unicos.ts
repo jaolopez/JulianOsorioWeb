@@ -50,14 +50,14 @@ export const portada = defineType({
   fields: [
     defineField({
       name: "titular",
-      title: "Titular",
+      title: "Frase bajo el nombre",
       type: "string",
-      description: "La frase grande del inicio. Ej: «Universo creativo».",
+      description: "Acompaña al nombre grande del inicio. Ej: «Universo creativo».",
       validation: (r) => r.max(40),
     }),
     defineField({
       name: "bajada",
-      title: "Texto bajo el titular",
+      title: "Presentación corta",
       type: "text",
       rows: 2,
     }),
@@ -70,10 +70,10 @@ export const portada = defineType({
     }),
     defineField({
       name: "albumDestacado",
-      title: "Álbum destacado",
+      title: "Música destacada",
       type: "reference",
-      to: [{ type: "album" }],
-      description: "El que se puede escuchar desde la portada.",
+      to: [{ type: "album" }, { type: "cancion" }],
+      description: "El disco o la canción que suena desde la portada. Si queda vacío se usa el disco más reciente.",
     }),
     defineField({
       name: "textoDestacado",
@@ -86,7 +86,7 @@ export const portada = defineType({
       name: "mundos",
       title: "Los cuatro mundos",
       type: "array",
-      description: "Foto y frase de cada sección en la portada. Deben ser cuatro, en el orden en que aparecen.",
+      description: "Foto y frase de cada sección en las cuatro puertas del inicio. Deben ser cuatro, en el orden en que aparecen.",
       validation: (r) => r.max(4),
       of: [
         defineArrayMember({
@@ -118,7 +118,7 @@ export const portada = defineType({
   preview: { prepare: () => ({ title: "Portada" }) },
 });
 
-/** Página «Acerca de mí». */
+/** «Acerca de mí»: la sección del inicio que cuenta quién es Julián. */
 export const acerca = defineType({
   name: "acerca",
   title: "Acerca de mí",

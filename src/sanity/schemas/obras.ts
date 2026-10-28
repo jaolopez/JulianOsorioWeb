@@ -1,14 +1,17 @@
+import { BookIcon } from "@sanity/icons/Book";
+import { ImagesIcon } from "@sanity/icons/Images";
+import { LemonIcon } from "@sanity/icons/Lemon";
 import { defineArrayMember, defineField, defineType } from "sanity";
-import { campoFecha, campoFoto, campoFotos, campoSlug, MUNDOS } from "./campos";
+import { campoFecha, campoFoto, campoFotos } from "./campos";
 
 /** Poema, prosa o relato. */
 export const texto = defineType({
   name: "texto",
+  icon: BookIcon,
   title: "Texto",
   type: "document",
   fields: [
     defineField({ name: "titulo", title: "Título", type: "string", validation: (r) => r.required() }),
-    campoSlug(),
     defineField({
       name: "tipo",
       title: "Tipo",
@@ -40,7 +43,7 @@ export const texto = defineType({
       type: "string",
       description: "Opcional. Se muestra en el listado. Si queda vacío se usa el primer renglón.",
     }),
-    campoFoto("imagen", "Imagen", "Opcional. Acompaña el texto en el listado."),
+    campoFoto("imagen", "Imagen", "Opcional. Acompaña el texto."),
   ],
   orderings: [{ title: "Más recientes", name: "fechaDesc", by: [{ field: "fecha", direction: "desc" }] }],
   preview: { select: { title: "titulo", subtitle: "tipo", media: "imagen" } },
@@ -49,11 +52,11 @@ export const texto = defineType({
 /** Serie o galería de fotografías. */
 export const galeria = defineType({
   name: "galeria",
+  icon: ImagesIcon,
   title: "Galería de fotos",
   type: "document",
   fields: [
     defineField({ name: "titulo", title: "Título", type: "string", validation: (r) => r.required() }),
-    campoSlug(),
     campoFecha(),
     defineField({ name: "lugar", title: "Lugar", type: "string" }),
     defineField({ name: "descripcion", title: "Descripción", type: "text", rows: 3 }),
@@ -67,11 +70,11 @@ export const galeria = defineType({
 /** Experiencia gastronómica (#experienciasoneto). */
 export const experiencia = defineType({
   name: "experiencia",
+  icon: LemonIcon,
   title: "Experiencia gastronómica",
   type: "document",
   fields: [
     defineField({ name: "titulo", title: "Título", type: "string", validation: (r) => r.required() }),
-    campoSlug(),
     campoFecha(),
     defineField({ name: "lugar", title: "Lugar", type: "string" }),
     defineField({ name: "descripcion", title: "Descripción", type: "text", rows: 4 }),
@@ -84,67 +87,6 @@ export const experiencia = defineType({
     }),
     campoFoto("portada", "Foto de portada"),
     campoFotos(),
-  ],
-  orderings: [{ title: "Más recientes", name: "fechaDesc", by: [{ field: "fecha", direction: "desc" }] }],
-  preview: { select: { title: "titulo", subtitle: "fecha", media: "portada" } },
-});
-
-/** Entrada de la bitácora: noticias, lanzamientos, notas. */
-export const publicacion = defineType({
-  name: "publicacion",
-  title: "Publicación",
-  type: "document",
-  fields: [
-    defineField({ name: "titulo", title: "Título", type: "string", validation: (r) => r.required() }),
-    campoSlug(),
-    campoFecha("Fecha de publicación"),
-    defineField({
-      name: "mundo",
-      title: "Sección",
-      type: "string",
-      options: { list: MUNDOS, layout: "radio", direction: "horizontal" },
-      initialValue: "general",
-    }),
-    defineField({
-      name: "extracto",
-      title: "Resumen",
-      type: "text",
-      rows: 3,
-      description: "Dos o tres líneas; es lo que se ve en el listado.",
-    }),
-    campoFoto("portada", "Imagen de portada"),
-    defineField({
-      name: "contenido",
-      title: "Contenido",
-      type: "array",
-      description: "Admite subtítulos, listas, negritas, enlaces, fotos y videos de YouTube.",
-      of: [
-        defineArrayMember({
-          type: "block",
-          styles: [
-            { title: "Normal", value: "normal" },
-            { title: "Subtítulo", value: "h2" },
-            { title: "Subtítulo pequeño", value: "h3" },
-            { title: "Cita", value: "blockquote" },
-          ],
-        }),
-        defineArrayMember({
-          type: "image",
-          options: { hotspot: true },
-          fields: [
-            defineField({ name: "alt", title: "Descripción de la foto", type: "string" }),
-            defineField({ name: "pie", title: "Pie de foto", type: "string" }),
-          ],
-        }),
-        defineArrayMember({
-          type: "object",
-          name: "youtube",
-          title: "Video de YouTube",
-          fields: [defineField({ name: "url", title: "Dirección del video", type: "url" })],
-          preview: { select: { title: "url" }, prepare: ({ title }) => ({ title: "Video", subtitle: title }) },
-        }),
-      ],
-    }),
   ],
   orderings: [{ title: "Más recientes", name: "fechaDesc", by: [{ field: "fecha", direction: "desc" }] }],
   preview: { select: { title: "titulo", subtitle: "fecha", media: "portada" } },

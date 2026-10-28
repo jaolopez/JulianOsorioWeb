@@ -5,32 +5,6 @@ import { defineField } from "sanity";
  * Studio se comporte igual en todos lados.
  */
 
-/** "Infinito más cercano" → "infinito-mas-cercano". Tildes y ñ en una dirección se rompen al compartirla. */
-export function slugificar(texto: string) {
-  return texto
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
-}
-
-export const campoSlug = (fuente = "titulo") =>
-  defineField({
-    name: "slug",
-    title: "Dirección web",
-    type: "slug",
-    description: "Se arma sola: escribí el título y tocá «Generate».",
-    options: { source: fuente, maxLength: 80, slugify: slugificar },
-    validation: (r) =>
-      r.required().custom((valor?: { current?: string }) =>
-        !valor?.current || /^[a-z0-9]+(-[a-z0-9]+)*$/.test(valor.current)
-          ? true
-          : "Sólo minúsculas sin tilde, números y guiones. Tocá «Generate» para corregirla."
-      ),
-  });
-
 /** Foto con texto alternativo (lo leen los lectores de pantalla y Google). */
 export const campoFoto = (name: string, title: string, description?: string) =>
   defineField({
@@ -85,11 +59,3 @@ export const campoOrden = defineField({
   type: "number",
   description: "Número menor aparece primero. Opcional.",
 });
-
-export const MUNDOS = [
-  { title: "Música", value: "musica" },
-  { title: "Escritura", value: "escritura" },
-  { title: "Fotografía", value: "fotografia" },
-  { title: "Gastronomía", value: "gastronomia" },
-  { title: "General", value: "general" },
-];
