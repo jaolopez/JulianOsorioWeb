@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useReproductor } from "@/components/audio/Reproductor";
 import { Play } from "@/components/ui/Iconos";
+import { miniaturaYoutube } from "@/lib/youtube";
 
 /**
  * Video de YouTube que no carga nada de YouTube hasta que se toca: sólo la
@@ -35,7 +36,7 @@ export default function VideoYoutube({ id, titulo }: { id: string; titulo: strin
           aria-label={`Ver «${titulo}»`}
         >
           <img
-            src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
+            src={miniaturaYoutube(id)}
             alt=""
             loading="lazy"
             className="size-full object-cover opacity-80 transition-[scale,opacity] duration-1000 ease-[var(--ease-expo)] group-hover:scale-105 group-hover:opacity-100"
