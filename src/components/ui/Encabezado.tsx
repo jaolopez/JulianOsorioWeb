@@ -21,10 +21,11 @@ export default function Encabezado({
 }) {
   return (
     <header className="relative isolate overflow-hidden pt-[calc(var(--barra)+4rem)] pb-14 md:pt-[calc(var(--barra)+7rem)] md:pb-20">
+      {/* Halo hecho con un degradado: un desenfoque de este tamaño costaría mucho más. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-0 -z-10 h-[60vh] w-[120vw] -translate-x-1/2 -translate-y-1/2 rounded-[50%] opacity-30 blur-[120px]"
-        style={{ background: tono }}
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[70vh] opacity-30"
+        style={{ background: `radial-gradient(ellipse 60% 55% at 50% 0%, ${tono}, transparent)` }}
       />
       <div className="contenedor">
         <p data-aparecer className="kicker flex items-center gap-3 text-ceniza">

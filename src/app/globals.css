@@ -84,27 +84,29 @@ html.lenis body {
   overscroll-behavior: contain;
 }
 
-/* --- Grano de película: textura fija sobre todo el sitio --- */
+/* --- Grano de película: textura fija sobre todo el sitio ---
+   Una baldosa de 220 px que se repite, apenas más grande que la pantalla
+   (no el cuádruple) y movida sólo con transform: la tarjeta de video la
+   desplaza sin volver a dibujar nada. */
 
 .grano {
   pointer-events: none;
   position: fixed;
-  inset: -50%;
+  inset: -220px;
   z-index: 90;
-  width: 200%;
-  height: 200%;
   opacity: 0.07;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  will-change: transform;
   animation: grano 0.9s steps(6) infinite;
 }
 
 @keyframes grano {
-  0% { transform: translate(0, 0); }
-  20% { transform: translate(-6%, 4%); }
-  40% { transform: translate(4%, -7%); }
-  60% { transform: translate(-3%, 9%); }
-  80% { transform: translate(8%, -2%); }
-  100% { transform: translate(0, 0); }
+  0% { transform: translate3d(0, 0, 0); }
+  20% { transform: translate3d(-130px, 90px, 0); }
+  40% { transform: translate3d(90px, -150px, 0); }
+  60% { transform: translate3d(-70px, 200px, 0); }
+  80% { transform: translate3d(180px, -40px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
 }
 
 /* --- Piezas tipográficas --- */
@@ -160,14 +162,6 @@ html.lenis body {
 html:not(.js) .precarga,
 .ya-visto .precarga {
   display: none;
-}
-
-/* Cursor propio con mouse: se oculta el del sistema salvo en campos de texto. */
-html.cursor-propio,
-html.cursor-propio a,
-html.cursor-propio button,
-html.cursor-propio [data-cursor] {
-  cursor: none;
 }
 
 /* Antes de que GSAP tome el control los elementos animados no parpadean. */
@@ -240,11 +234,11 @@ html.cursor-propio [data-cursor] {
 ::view-transition-new(.pagina) {
   animation: 0.9s var(--ease-expo) 0.15s both entrada-pagina;
 }
+/* Sin desenfoque: sobre una captura de pantalla completa es lo que más cuesta. */
 @keyframes salida-pagina {
   to {
     opacity: 0;
     transform: translateY(-3vh) scale(0.985);
-    filter: blur(6px);
   }
 }
 @keyframes entrada-pagina {
@@ -255,20 +249,6 @@ html.cursor-propio [data-cursor] {
   to {
     clip-path: inset(0 0 0 0);
     transform: none;
-  }
-}
-
-/* Foto que viaja de la miniatura a la página de detalle. */
-::view-transition-group(.foto-viaje) {
-  animation-duration: 0.75s;
-  animation-timing-function: var(--ease-expo);
-}
-::view-transition-image-pair(.foto-viaje) {
-  animation-name: via-desenfoque;
-}
-@keyframes via-desenfoque {
-  35% {
-    filter: blur(4px) brightness(1.15);
   }
 }
 
@@ -287,26 +267,6 @@ html.cursor-propio [data-cursor] {
   }
   .grano {
     animation: none;
-  }
-}
-
-/* --- Animaciones ligeras ligadas al scroll, sin JavaScript (CSS scroll-driven) --- */
-
-@supports (animation-timeline: view()) {
-  .acercar-al-ver {
-    animation: acercar linear both;
-    animation-timeline: view();
-    animation-range: entry 0% cover 60%;
-  }
-  @keyframes acercar {
-    from {
-      transform: scale(1.18);
-      filter: saturate(0.4) brightness(0.7);
-    }
-    to {
-      transform: scale(1);
-      filter: none;
-    }
   }
 }
 
@@ -340,4 +300,21 @@ html.cursor-propio [data-cursor] {
 /* Disco de vinilo: gira mientras suena. */
 @keyframes girar {
   to { rotate: 360deg; }
+}
+
+/* Letras de canciones: se despliegan con suavidad en vez de aparecer de golpe. */
+@supports (interpolate-size: allow-keywords) {
+  details {
+    interpolate-size: allow-keywords;
+  }
+  details::details-content {
+    height: 0;
+    overflow: clip;
+    transition:
+      height 0.6s var(--ease-expo),
+      content-visibility 0.6s allow-discrete;
+  }
+  details[open]::details-content {
+    height: auto;
+  }
 }

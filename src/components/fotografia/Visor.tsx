@@ -101,7 +101,7 @@ export default function Visor({ fotos, titulo }: { fotos: TFoto[]; titulo: strin
           role="dialog"
           aria-modal="true"
           aria-label={`${titulo}: foto ${abierta! + 1} de ${fotos.length}`}
-          className="fixed inset-0 z-[95] flex flex-col bg-noche/95 backdrop-blur-xl"
+          className="fixed inset-0 z-[95] flex flex-col bg-noche/[0.97]"
           onPointerDown={(e) => (toque.current = e.clientX)}
           onPointerUp={(e) => {
             if (toque.current === null) return;
