@@ -9,8 +9,11 @@ import { bus } from "@/components/audio/bus";
  * puro (sin librerías): ruido fractal deformado sobre sí mismo, que sigue al
  * puntero y respira con los graves de la canción que esté sonando.
  *
- * Se dibuja a resolución reducida —el humo es suave, no necesita píxeles— y
- * se detiene cuando sale de la pantalla o la pestaña queda oculta.
+ * Se dibuja a resolución reducida —el humo es suave, no necesita píxeles—,
+ * a 60 cuadros como máximo aunque la pantalla vaya a 120 (el humo no se ve
+ * distinto y la tarjeta de video trabaja la mitad), con una capa menos de
+ * ruido en celulares, y se detiene cuando sale de la pantalla o la pestaña
+ * queda oculta.
  */
 
 const VERTICES = `
@@ -39,7 +42,7 @@ float ruido(vec2 p) {
 float fbm(vec2 p) {
   float v = 0.0, a = 0.5;
   mat2 giro = mat2(0.8, -0.6, 0.6, 0.8);
-  for (int i = 0; i < 5; i++) { v += a * ruido(p); p = giro * p * 2.03; a *= 0.5; }
+  for (int i = 0; i < OCTAVAS; i++) { v += a * ruido(p); p = giro * p * 2.03; a *= 0.5; }
   return v;
 }
 
@@ -103,8 +106,11 @@ export default function Humo({ className = "" }: { className?: string }) {
     const gl = c?.getContext("webgl", { antialias: false, alpha: false, powerPreference: "low-power" });
     if (!c || !gl) return;
 
+    const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const tactil = !window.matchMedia("(pointer: fine)").matches;
+
     const vs = compilar(gl, gl.VERTEX_SHADER, VERTICES);
-    const fs = compilar(gl, gl.FRAGMENT_SHADER, FRAGMENTOS);
+    const fs = compilar(gl, gl.FRAGMENT_SHADER, `#define OCTAVAS ${tactil ? 4 : 5}\n${FRAGMENTOS}`);
     if (!vs || !fs) return;
     const prog = gl.createProgram()!;
     gl.attachShader(prog, vs);
@@ -123,10 +129,8 @@ export default function Humo({ className = "" }: { className?: string }) {
     const u = (n: string) => gl.getUniformLocation(prog, n);
     const uRes = u("uRes"), uT = u("uT"), uMouse = u("uMouse"), uAudio = u("uAudio"), uGraves = u("uGraves"), uEntrada = u("uEntrada");
 
-    const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const tactil = !window.matchMedia("(pointer: fine)").matches;
     // Menos píxeles en celulares: el humo se ve igual y la batería lo agradece.
-    const escala = tactil ? 0.4 : 0.55;
+    const escala = tactil ? 0.4 : 0.5;
 
     const medir = () => {
       c.width = Math.max(1, Math.round(c.clientWidth * escala));
@@ -152,13 +156,18 @@ export default function Humo({ className = "" }: { className?: string }) {
 
     let id = 0;
     let entrada = 0;
+    let ultimo = 0;
     const inicio = performance.now();
     const cuadro = (ahora: number) => {
       id = requestAnimationFrame(cuadro);
       if (!visible || document.hidden) return;
-      mouse.x += (mouse.tx - mouse.x) * 0.05;
-      mouse.y += (mouse.ty - mouse.y) * 0.05;
-      entrada = Math.min(1, entrada + 0.012);
+      if (ahora - ultimo < 15) return;
+      const dt = Math.min(4, (ahora - (ultimo || ahora - 16.7)) / 16.7);
+      ultimo = ahora;
+      const k = 1 - Math.pow(0.95, dt);
+      mouse.x += (mouse.tx - mouse.x) * k;
+      mouse.y += (mouse.ty - mouse.y) * k;
+      entrada = Math.min(1, entrada + 0.012 * dt);
       gl.uniform1f(uT, quieto ? 12 : (ahora - inicio) / 1000);
       gl.uniform2f(uMouse, mouse.x, mouse.y);
       gl.uniform1f(uAudio, bus.nivel);
