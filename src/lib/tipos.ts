@@ -36,7 +36,8 @@ export type Portada = {
   titular: string;
   bajada: string;
   manifiesto: string;
-  albumSlug?: string;
+  /** Disco o canción que suena desde el inicio (por su `slug`). */
+  destacado?: { tipo: "album" | "cancion"; slug: string };
   textoSlug?: string;
   mundos: MundoPortada[];
 };
@@ -46,8 +47,16 @@ export type Cancion = {
   audio?: string;
   duracion?: string;
   letra?: string;
+  /** Carátula propia (canciones sueltas); si falta, la del disco. */
+  portada?: Foto;
+  /** Ancla dentro de /musica (canciones sueltas). */
+  slug?: string;
 };
 
+/**
+ * Disco con sus canciones. Una canción suelta también llega con esta forma
+ * (`tipo: "sencillo"`, una sola canción), así se muestra y se escucha igual.
+ */
 export type Album = {
   slug: string;
   titulo: string;
@@ -100,16 +109,6 @@ export type Experiencia = {
   menu: string[];
   portada?: Foto;
   fotos: Foto[];
-};
-
-export type Publicacion = {
-  slug: string;
-  titulo: string;
-  fecha: string;
-  mundo: ClaveMundo | "general";
-  extracto?: string;
-  portada?: Foto;
-  contenido?: PortableTextBlock[];
 };
 
 export type Acerca = {
