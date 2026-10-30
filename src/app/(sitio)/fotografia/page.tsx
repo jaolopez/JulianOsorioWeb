@@ -44,6 +44,11 @@ export default async function FotografiaPagina() {
         )}
       </Encabezado>
 
+      {galerias.length === 0 && (
+        <p data-aparecer className="contenedor display pb-32 text-4xl italic text-ceniza">
+          Las primeras galerías están por llegar.
+        </p>
+      )}
       {galerias.map((g, i) => (
         <section key={g.slug} id={g.slug} className="scroll-mt-[var(--barra)] pb-24 md:pb-36" aria-labelledby={`galeria-${g.slug}`}>
           <div className="relative h-[70svh] min-h-[26rem] overflow-hidden">
