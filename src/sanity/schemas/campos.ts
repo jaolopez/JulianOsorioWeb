@@ -24,11 +24,12 @@ export const campoFoto = (name: string, title: string, description?: string) =>
   });
 
 /** Lista de fotos para galerías. */
-export const campoFotos = (name = "fotos", title = "Fotos") =>
+export const campoFotos = (name = "fotos", title = "Fotos", minimo = 0) =>
   defineField({
     name,
     title,
     type: "array",
+    validation: (r) => (minimo ? r.min(minimo).error("Agregá al menos una foto: sin fotos la galería no se muestra.") : r),
     description: "Arrastrá varias fotos a la vez. Se pueden reordenar arrastrándolas.",
     options: { layout: "grid" },
     of: [

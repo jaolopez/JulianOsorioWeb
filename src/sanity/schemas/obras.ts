@@ -61,7 +61,7 @@ export const galeria = defineType({
     defineField({ name: "lugar", title: "Lugar", type: "string" }),
     defineField({ name: "descripcion", title: "Descripción", type: "text", rows: 3 }),
     campoFoto("portada", "Foto de portada", "Si queda vacía se usa la primera de la galería."),
-    campoFotos(),
+    campoFotos("fotos", "Fotos", 1),
   ],
   orderings: [{ title: "Más recientes", name: "fechaDesc", by: [{ field: "fecha", direction: "desc" }] }],
   preview: { select: { title: "titulo", subtitle: "lugar", media: "portada" } },
@@ -85,9 +85,13 @@ export const experiencia = defineType({
       description: "Opcional. Cada plato o trago en un renglón.",
       of: [defineArrayMember({ type: "string" })],
     }),
-    campoFoto("portada", "Foto de portada"),
-    campoFotos(),
+    campoFoto("portada", "Foto de portada", "La foto grande. Si queda vacía se usa la primera de las fotos."),
+    campoFotos("fotos", "Más fotos"),
   ],
+  validation: (r) =>
+    r.custom((doc) =>
+      doc?.portada || (Array.isArray(doc?.fotos) && doc.fotos.length) ? true : "Subí al menos una foto (de portada o en «Más fotos»)."
+    ),
   orderings: [{ title: "Más recientes", name: "fechaDesc", by: [{ field: "fecha", direction: "desc" }] }],
   preview: { select: { title: "titulo", subtitle: "fecha", media: "portada" } },
 });
