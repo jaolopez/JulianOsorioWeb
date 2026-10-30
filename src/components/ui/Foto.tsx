@@ -7,9 +7,14 @@ import type { Foto as TFoto } from "@/lib/tipos";
  * Las fotos subidas al Studio ya las redimensiona y convierte la CDN de
  * Sanity: se le piden directamente al ancho justo, sin pasar por el
  * optimizador de Next (que en el plan gratuito de Vercel tiene cupo).
+ *
+ * El ancho tiene techo: una foto de cámara (6000 px) pedida a 3840 pesa
+ * varios MB y decodificarla congela el scroll un instante; a 2400 se ve
+ * igual de nítida en cualquier pantalla y pesa un tercio.
  */
+const ANCHO_MAXIMO = 2400;
 const cargadorSanity: ImageLoader = ({ src, width, quality }) =>
-  `${src}?w=${width}&q=${quality ?? 75}&auto=format&fit=max`;
+  `${src}?w=${Math.min(width, ANCHO_MAXIMO)}&q=${quality ?? 75}&auto=format&fit=max`;
 
 type Props = Omit<ImageProps, "src" | "alt" | "width" | "height" | "placeholder" | "blurDataURL"> & {
   foto: TFoto;
