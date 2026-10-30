@@ -1,3 +1,5 @@
+"use client";
+
 import Image, { type ImageLoader, type ImageProps } from "next/image";
 import type { Foto as TFoto } from "@/lib/tipos";
 
