@@ -65,7 +65,7 @@ export default function LuzDetenida({ items }: { items: Item[] }) {
     >
       <div
         ref={pista}
-        className="sin-barra flex snap-x snap-mandatory gap-4 overflow-x-auto px-[var(--gutter)] md:h-[78vh] md:snap-none md:items-center md:gap-[4vw] md:overflow-visible"
+        className="sin-barra flex snap-x snap-mandatory gap-4 overflow-x-auto px-[var(--gutter)] md:h-[78vh] md:snap-none md:items-center md:gap-[4vw] md:overflow-visible md:will-change-transform"
       >
         <div className="flex w-[78vw] shrink-0 snap-start flex-col justify-end md:w-[32vw]">
           <p className="kicker flex items-center gap-3 text-ceniza">

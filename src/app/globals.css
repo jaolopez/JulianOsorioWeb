@@ -109,6 +109,14 @@ html.lenis body {
   100% { transform: translate3d(0, 0, 0); }
 }
 
+/* Lo que el scroll desplaza cuadro a cuadro va en su propia capa: la tarjeta
+   de video lo mueve sin volver a pintarlo (Safari lo agradece en especial). */
+[data-parallax],
+[data-dentro],
+[data-hero-titular] {
+  will-change: transform;
+}
+
 /* --- Piezas tipográficas --- */
 
 @utility contenedor {
