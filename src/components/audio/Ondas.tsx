@@ -5,8 +5,9 @@ import { bus } from "./bus";
 
 /**
  * Ecualizador en vivo: barras que siguen las frecuencias de lo que suena.
- * Dibuja en <canvas> fuera de React; quieto, las barras respiran apenas.
- * Sólo dibuja mientras está a la vista.
+ * Dibuja en <canvas> fuera de React; quieto, las barras respiran apenas
+ * (a 30 cuadros: tan lento no se nota y libera al navegador mientras se
+ * baja por la página). Sólo dibuja mientras está a la vista.
  */
 export default function Ondas({
   barras = 24,
@@ -28,7 +29,7 @@ export default function Ondas({
     const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const alturas = new Float32Array(barras);
     let id = 0;
-    let t = 0;
+    let ultimo = 0;
 
     const medir = () => {
       const dpr = Math.min(window.devicePixelRatio, 2);
@@ -47,9 +48,13 @@ export default function Ondas({
     });
     io.observe(c);
 
-    const dibujar = () => {
+    const dibujar = (ahora: number) => {
       if (!visible) return;
-      t += 0.04;
+      id = requestAnimationFrame(dibujar);
+      const enVivo = activo && bus.sonando && bus.frecuencias;
+      if (!enVivo && ahora - ultimo < 30) return;
+      ultimo = ahora;
+      const t = ahora * 0.0024;
       const { width: w, height: h } = c;
       ctx.clearRect(0, 0, w, h);
       const hueco = w / barras;
@@ -72,7 +77,6 @@ export default function Ondas({
         ctx.roundRect(i * hueco + (hueco - ancho) / 2, (h - bh) / 2, ancho, bh, ancho / 2);
         ctx.fill();
       }
-      id = requestAnimationFrame(dibujar);
     };
     return () => {
       cancelAnimationFrame(id);
