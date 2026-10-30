@@ -14,6 +14,8 @@ if (typeof window !== "undefined") {
   CustomEase.create("casa", "0.16, 1, 0.3, 1");
   CustomEase.create("telon", "0.76, 0, 0.24, 1");
   gsap.defaults({ ease: "casa", duration: 1.1 });
+  // En el celular la barra de direcciones cambia el alto al bajar: no es motivo para recalcular todo.
+  ScrollTrigger.config({ ignoreMobileResize: true });
 }
 
 export const sinMovimiento = () =>
