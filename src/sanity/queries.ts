@@ -82,6 +82,9 @@ function limpio<T extends object>(o: T | null | undefined): Partial<T> {
   return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== null && v !== undefined && v !== "")) as Partial<T>;
 }
 
+/** Una foto sin descripción toma el título de su galería: los lectores de pantalla nunca leen «imagen». */
+const conAlt = (titulo: string) => (f: Foto) => (f.alt ? f : { ...f, alt: titulo });
+
 /** Primer renglón con texto: sirve de extracto cuando no se escribió uno. */
 const primerRenglon = (cuerpo = "") => cuerpo.split("\n").find((l) => l.trim())?.trim() ?? "";
 
@@ -103,7 +106,7 @@ export async function getPortada(): Promise<Portada> {
   const doc = await consultar<Partial<Portada>>(
     "portada",
     `*[_id == "portada"][0]{
-      titular, bajada, manifiesto,
+      titular, bajada, manifiesto, ${foto("fotoManifiesto")},
       "destacado": albumDestacado->{ "tipo": _type, titulo, "archivo": audio.asset->originalFilename },
       "textoDestacado": textoDestacado->titulo,
       "mundos": mundos[]{ clave, frase, ${foto("foto")} }
@@ -263,8 +266,8 @@ export async function getGalerias(): Promise<Galeria[]> {
   // Sin portada se usa la primera foto; una galería sin ninguna foto no se muestra.
   return conSlugs(
     docs.flatMap((g) => {
-      const lista = g.fotos ?? [];
-      const portada = g.portada ?? lista[0];
+      const lista = (g.fotos ?? []).map(conAlt(g.titulo));
+      const portada = g.portada ? conAlt(g.titulo)(g.portada) : lista[0];
       return portada ? [{ ...g, fotos: lista, portada }] : [];
     })
   );
@@ -283,5 +286,10 @@ export async function getExperiencias(): Promise<Experiencia[]> {
     }`
   );
   if (!docs) return respaldo.EXPERIENCIAS;
-  return conSlugs(docs.map((e) => ({ ...e, fotos: e.fotos ?? [], portada: e.portada ?? e.fotos?.[0] })));
+  return conSlugs(
+    docs.map((e) => {
+      const fotos = (e.fotos ?? []).map(conAlt(e.titulo));
+      return { ...e, fotos, portada: e.portada ? conAlt(e.titulo)(e.portada) : fotos[0] };
+    })
+  );
 }

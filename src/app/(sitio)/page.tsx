@@ -68,7 +68,7 @@ export default async function Inicio() {
         pistas={album ? pistasDe(album) : []}
         disco={album?.titulo}
       />
-      <Manifiesto texto={portada.manifiesto} foto={FOTOS.concierto} />
+      <Manifiesto texto={portada.manifiesto} foto={portada.fotoManifiesto ?? FOTOS.concierto} />
       <Quien acerca={acerca} ajustes={ajustes} />
       {album && <MusicaDestacada album={album} funda={album.tipo === "sencillo" ? undefined : fotoMusica} />}
       <Agenda eventos={eventos.slice(0, 4)} titulo="Próximas fechas" />

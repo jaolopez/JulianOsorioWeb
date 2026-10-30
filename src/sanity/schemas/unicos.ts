@@ -68,6 +68,7 @@ export const portada = defineType({
       rows: 4,
       description: "Párrafo que se ilumina palabra por palabra al bajar por la página.",
     }),
+    campoFoto("fotoManifiesto", "Foto del manifiesto", "La foto pequeña que acompaña al manifiesto. Si queda vacía se usa la de siempre."),
     defineField({
       name: "albumDestacado",
       title: "Música destacada",

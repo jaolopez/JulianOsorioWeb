@@ -36,6 +36,7 @@ export type Portada = {
   titular: string;
   bajada: string;
   manifiesto: string;
+  fotoManifiesto?: Foto;
   /** Disco o canción que suena desde el inicio (por su `slug`). */
   destacado?: { tipo: "album" | "cancion"; slug: string };
   textoSlug?: string;
