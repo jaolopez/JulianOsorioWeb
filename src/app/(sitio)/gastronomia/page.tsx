@@ -6,12 +6,16 @@ import Encabezado from "@/components/ui/Encabezado";
 import Foto from "@/components/ui/Foto";
 import { fechaLarga } from "@/lib/fechas";
 import { MUNDOS } from "@/lib/mundos";
+import type { Experiencia } from "@/lib/tipos";
 import { getExperiencias, getPortada } from "@/sanity/queries";
 
 export const metadata: Metadata = {
   title: "Gastronomía",
   description: "#experienciasoneto: espacios para compartir entre amigos, algunos tragos y buena música.",
 };
+
+/** Las fotos de la experiencia sin repetir la de portada. */
+const resto = (e: Experiencia) => e.fotos.filter((f) => f.src !== e.portada?.src);
 
 export default async function GastronomiaPagina() {
   const [experiencias, portada] = await Promise.all([getExperiencias(), getPortada()]);
@@ -27,6 +31,11 @@ export default async function GastronomiaPagina() {
         <span className="display px-[0.3em] text-[clamp(3rem,8vw,8rem)]">✺</span>
       </Marquesina>
 
+      {experiencias.length === 0 && (
+        <p data-aparecer className="contenedor display py-24 text-4xl italic text-ceniza">
+          La próxima mesa está por servirse.
+        </p>
+      )}
       {experiencias.map((e, i) => (
         <article key={e.slug} id={e.slug} className="contenedor grid gap-12 py-20 md:grid-cols-12 md:py-32">
           {e.portada && (
@@ -59,9 +68,9 @@ export default async function GastronomiaPagina() {
               </ul>
             )}
           </div>
-          {e.fotos.length > 1 && (
+          {resto(e).length > 0 && (
             <div className="md:col-span-12">
-              <Visor fotos={e.fotos.slice(1)} titulo={e.titulo} />
+              <Visor fotos={resto(e)} titulo={e.titulo} />
             </div>
           )}
         </article>
